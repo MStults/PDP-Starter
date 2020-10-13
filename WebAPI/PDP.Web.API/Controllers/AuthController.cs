@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PDP.Web.API.Dtos.User;
-using PDP.Web.API.Models;
-using PDP.Web.API.Services.AuthService;
+using PDP.Web.API.Security;
 
 namespace PDP.Web.API.Controllers
 {
@@ -13,23 +13,24 @@ namespace PDP.Web.API.Controllers
     [Route("[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly IAuthService authService;
-        public AuthController(IAuthService authService)
+        private readonly IAuthRepository authRepo;
+
+        public AuthController(IAuthRepository authRepo)
         {
-            this.authService = authService;
+            this.authRepo = authRepo;
         }
 
         [HttpPost("Login")]
         public async Task<IActionResult> Login(UserLoginDto request)
         {
-            var response = await authService.Login(request);
+            var response = await authRepo.Login(request);
             return response.Success ? (IActionResult)Ok(response) : BadRequest(response);
         }
-
+        
         [HttpPost("Register")]
         public async Task<IActionResult> Register(UserRegisterDto request)
         {
-            var response = await authService.Register(request);
+            var response = await authRepo.Register(request);
             return response.Success ? (IActionResult)Ok(response) : BadRequest(response);
         }
 

@@ -1,14 +1,14 @@
 using System.Threading.Tasks;
 using PDP.Web.API.Dtos.User;
 
-namespace PDP.Web.API.Services.AuthService
+namespace PDP.Web.API.Security
 {
-    public interface IAuthService
+    public interface IAuthRepository
     {
         Task<Response<string>> Register(UserRegisterDto request);
 
         Task<Response<string>> Login(UserLoginDto request);
 
-        Task<bool> UserExist(string username); 
+        Task<bool> UserExist(string username);
     }
 }

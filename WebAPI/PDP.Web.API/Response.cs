@@ -1,4 +1,4 @@
-namespace PDP.Web.API.Services
+namespace PDP.Web.API
 {
     public class Response<T>
     {

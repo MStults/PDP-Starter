@@ -5,7 +5,6 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -13,17 +12,18 @@ using PDP.Web.API.Data;
 using PDP.Web.API.Dtos.User;
 using PDP.Web.API.Models;
 
-namespace PDP.Web.API.Services.AuthService
+
+namespace PDP.Web.API.Security
 {
-    public class AuthService : IAuthService
+    public class AuthRepository : IAuthRepository
     {
         private readonly IConfiguration configuration;
         private readonly DataContext context;
-        private readonly IMapper mapper;
 
-        public AuthService(IMapper mapper, DataContext context, IConfiguration configuration)
+        private const string loginErrMsg = "The username or password is incorrect.";
+
+        public AuthRepository(DataContext context, IConfiguration configuration)
         {
-            this.mapper = mapper;
             this.context = context;
             this.configuration = configuration;
         }
@@ -31,15 +31,15 @@ namespace PDP.Web.API.Services.AuthService
         public async Task<Response<string>> Login(UserLoginDto login)
         {
             var user = await context.Users.Include(u => u.Password).FirstOrDefaultAsync(x => x.Username == login.Username);
-            if (user == null) return Response<string>.Fail("The username or password is incorrect.");
-
+            if (user == null) return Response<string>.Fail(loginErrMsg);
+            if (user.Password == null) return Response<string>.Fail(loginErrMsg);
             return VerifyPasswordHash(login.Password, user.Password.Hash, user.Password.Salt) ?
                 Response<string>.Succeed(CreateToken(user)) :
-                Response<string>.Fail("The username or password is incorrect.");
+                Response<string>.Fail(loginErrMsg);
         }
+
         public async Task<Response<string>> Register(UserRegisterDto registration)
         {
-
             if (await UserExist(registration.Username))
             {
                 return Response<string>.Fail("User already exists.");
